@@ -77,3 +77,31 @@ https://console.firebase.google.com/project/salestrack-e4495/usage/details
 
 Having trouble? Try firebase [command] --help
 josealmontecolon@MacBook-Air-de-jose mi-proyecto-firebase % NOTE
+
+
+
+
+i want also to say that i combined the emulator with the firestore database to test and it worked you can purchase any product on the website and test the code
+for that i created a free app product that you can purchase for 00.
+
+
+
+to test the functions 
+
+in the terminal :
+
+1.firebase emulators:start
+
+2.installed ngrok 
+
+3. ngrok http 5001 on the terminal.
+
+
+after that you  purchase the product  (cost its 0.00 for testing purpose)
+
+https://sukcesmedia.pl/product/aplikacja-sukces-media/
+
+dont forget to login with your firebase on your vs code terminal it will create automatically firestore database and store there the last purchase and you can go and check and do what ever you want with this data .
+
+
+I really enjoyed doing this retification as i forgot about firestore EMULATOR .thanks

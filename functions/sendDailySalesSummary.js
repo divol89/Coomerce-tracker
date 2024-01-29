@@ -2,7 +2,6 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
 
-admin.initializeApp();
 
 // Configura Nodemailer con tu servicio de correo electrónico
 const mailTransport = nodemailer.createTransport({
@@ -13,7 +12,7 @@ const mailTransport = nodemailer.createTransport({
   },
 });
 
-exports.sendDailySalesSummary = functions.pubsub.schedule('0 23 * * *') // Ejecuta a las 23:00 hrs cada día
+const sendDailySalesSummary = functions.pubsub.schedule('0 23 * * *')
   .timeZone('America/New_York') // Ajusta a tu zona horaria
   .onRun(async (context) => {
     const summary = await compileSalesSummary(); // Compila el resumen de ventas del día
@@ -74,3 +73,5 @@ async function compileSalesSummary() {
 
   return summary;
 }
+
+module.exports = sendDailySalesSummary;
