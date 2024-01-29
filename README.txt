@@ -1,5 +1,7 @@
 
-WooCommerce and Firebase Integration Documentation
+WooCommerce and Firebase Integration Documentation for the website :
+
+https://sukcesmedia.pl/
 
 
 System Architecture
