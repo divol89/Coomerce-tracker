@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require("firebase-admin");
-// const WEBHOOK_SECRET = "45xMN90";
+// const WEBHOOK_SECRET = "";
 
 const recordSale = functions.https.onRequest((req, res) => {
   console.log('Cabeceras de la solicitud:', req.headers);
@@ -32,7 +32,7 @@ const recordSale = functions.https.onRequest((req, res) => {
 
 
   if (saleData.status === "completed") {
-    
+
     // Guarda los datos en Firestore
   const salesRef = admin.firestore().collection('sales');
   salesRef.add(dataToSave)

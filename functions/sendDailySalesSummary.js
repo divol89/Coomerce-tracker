@@ -5,73 +5,75 @@ const nodemailer = require('nodemailer');
 
 // Configura Nodemailer con tu servicio de correo electrónico
 const mailTransport = nodemailer.createTransport({
-  service: 'gmail', // Ejemplo con Gmail, ajusta según tu proveedor
+  service: 'gmail',
   auth: {
-    user: 'tu-email@gmail.com',
-    pass: 'tu-contraseña', // Considera usar variables de entorno o Firebase Config para manejar esto de manera segura
+    type: 'OAuth2',
+    user: 'eagle1989x1000@gmail.com',
+    clientId: 'YOUR_CLIENT_ID',
+    clientSecret: 'YOUR_CLIENT_SECRET',
+    refreshToken: 'YOUR_REFRESH_TOKEN',
   },
 });
 
+const sendSummary = async () => {
+  const summary = await compileSalesSummary(); // Compila el resumen de ventas del día
+
+  const mailOptions = {
+    from: '"Tu Tienda" <eagle1989x1000@gmail.com>',
+    to: 'eagle1989x1000@gmail.com',
+    subject: 'Resumen de Ventas Diarias',
+    text: summary, // Considera usar HTML para un formato más rico
+  };
+
+  try {
+    await mailTransport.sendMail(mailOptions);
+    console.log('Resumen de ventas enviado.');
+  } catch (error) {
+    console.error('Hubo un problema al enviar el correo electrónico:', error);
+  }
+};
+
+
+
+
+
+
+
 const sendDailySalesSummary = functions.pubsub.schedule('0 23 * * *')
   .timeZone('America/New_York') // Ajusta a tu zona horaria
-  .onRun(async (context) => {
-    const summary = await compileSalesSummary(); // Compila el resumen de ventas del día
+  .onRun(sendSummary);
 
-    const mailOptions = {
-      from: '"Tu Tienda" <tu-email@gmail.com>',
-      to: 'admin@tu-tienda.com',
-      subject: 'Resumen de Ventas Diarias',
-      text: summary, // Considera usar HTML para un formato más rico
-    };
+  async function compileSalesSummary() {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-    try {
-      await mailTransport.sendMail(mailOptions);
-      console.log('Resumen de ventas enviado.');
-    } catch (error) {
-      console.error('Hubo un problema al enviar el correo electrónico:', error);
-    }
-  });
+    const salesSnapshot = await admin.firestore().collection('sales')
+        .where('dateCompleted', '>=', yesterday.toISOString())
+        .where('dateCompleted', '<', today.toISOString())
+        .get();
 
-async function compileSalesSummary() {
-  // Obtén la fecha de hoy y la fecha de ayer en formato adecuado
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
+    let totalSales = 0;
+    let totalRevenue = 0.0;
+    let itemsSummary = '';
 
-  // Consulta Firestore por las ventas del día anterior
-  const salesSnapshot = await admin.firestore().collection('sales')
-    .where('date', '>=', yesterday)
-    .where('date', '<', today)
-    .get();
+    salesSnapshot.forEach(doc => {
+        const sale = doc.data();
+        totalSales++;
+        totalRevenue += parseFloat(sale.total || '0');
 
-  // Procesa los datos para compilar el resumen
-  let totalSales = 0;
-  let totalRevenue = 0.0;
-  const productCounts = {}; // Un objeto para contar las ventas por producto
-
-  salesSnapshot.forEach(doc => {
-    const sale = doc.data();
-    totalSales++;
-    totalRevenue += sale.totalAmount;
-
-    sale.items.forEach(item => {
-      if (!productCounts[item.name]) {
-        productCounts[item.name] = 0;
-      }
-      productCounts[item.name] += item.quantity;
+        sale.items.forEach(item => {
+            itemsSummary += `Producto: ${item.name}, ID: ${item.productId}, Cantidad: ${item.quantity}, Total: $${item.total}\n`;
+        });
     });
-  });
 
-  // Encuentra el producto más vendido
-  const topProduct = Object.keys(productCounts).reduce((a, b) => productCounts[a] > productCounts[b] ? a : b);
+    const summary = `Resumen de Ventas del ${yesterday.toLocaleDateString()}:\n` +
+                    `Total de Ventas: ${totalSales}\n` +
+                    `Ingreso Total: $${totalRevenue.toFixed(2)}\n` +
+                    `Detalle de los ítems vendidos:\n${itemsSummary}`;
 
-  // Formatea el resumen
-  const summary = `Resumen de Ventas del ${yesterday.toLocaleDateString()}:\n` +
-                  `Total de Ventas: ${totalSales}\n` +
-                  `Ingreso Total: $${totalRevenue.toFixed(2)}\n` +
-                  `Producto Más Vendido: ${topProduct} con ${productCounts[topProduct]} unidades.`;
-
-  return summary;
+    return summary;
 }
-
+// Llama a la función inmediatamente al iniciar el servidor
+sendSummary();
 module.exports = sendDailySalesSummary;

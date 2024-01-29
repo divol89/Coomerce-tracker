@@ -104,4 +104,55 @@ https://sukcesmedia.pl/product/aplikacja-sukces-media/
 dont forget to login with your firebase on your vs code terminal it will create automatically firestore database and store there the last purchase and you can go and check and do what ever you want with this data .
 
 
-I really enjoyed doing this retification as i forgot about firestore EMULATOR .thanks
+
+
+
+SEND DAILY SALES SUMMARY 
+
+Given Google's policy change that no longer allows access to Google accounts through applications using only username and password for authentication (considered less secure apps), the safest and most sustainable recommendation is to use OAuth2 authentication to access Google services. This includes sending emails through Gmail with Nodemailer in your Firebase Functions project.
+
+Implementing OAuth2 with Nodemailer:
+To use OAuth2, you'll need to obtain a client_id, client_secret, and a refresh_token from your Google Cloud Platform console. These credentials will then be used to configure Nodemailer.
+
+Steps to Configure OAuth2:
+Create a Project in Google Cloud Platform (GCP):
+
+Go to the Google Cloud Console and create a new project or select an existing one.
+Enable Gmail API:
+
+Within your GCP project, go to "API & Services" > "Library", search for the "Gmail API" and enable this API for your project.
+Create OAuth 2.0 Credentials:
+
+Navigate to "Credentials" in the sidebar of GCP, click "Create Credentials", and select "OAuth client ID".
+Set up the OAuth consent screen if you haven't already.
+Choose "Desktop app" as the application type when creating the OAuth client ID.
+Obtain client_id, client_secret, and Generate refresh_token:
+
+Once you've created the OAuth 2.0 credentials, copy the client_id and client_secret.
+To obtain the refresh_token, use a tool or script that implements the OAuth 2.0 authentication flow with your client_id and client_secret. During this process, you will grant permissions to the app and receive an authorization code that you can exchange for a refresh_token.
+Configure Nodemailer in Your Firebase Function:
+
+
+
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    type: 'OAuth2',
+    user: 'XXXXXXXX@gmail.com',
+    clientId: 'YOUR_CLIENT_ID',
+    clientSecret: 'YOUR_CLIENT_SECRET',
+    refreshToken: 'YOUR_REFRESH_TOKEN',
+  },
+});
+
+Replace 'YOUR_CLIENT_ID', 'YOUR_CLIENT_SECRET', and 'YOUR_REFRESH_TOKEN' with your actual values obtained in the previous steps.
+Deployment and Testing:
+After setting up Nodemailer with OAuth2, deploy your Firebase function with firebase deploy --only functions and perform tests to ensure that emails are sent correctly.
+By using OAuth2, your application will be more secure and comply with Google's policies, ensuring long-term compatibility with Google services.
+
+NOTE : for testing purpose the function sendDailyASalesSummary sends instant mail every time you run the init or save command ,for testing purpose.
+
+
+I really enjoyed doing this retification as i forgot about firestore EMULATOR .thanks!

@@ -12,3 +12,4 @@ const recordSale = require('./recordSale');
 
 exports.sendDailySalesSummary = sendDailySalesSummary;
 exports.recordSale = recordSale;
+
